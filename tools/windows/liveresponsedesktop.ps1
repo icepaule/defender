@@ -41,6 +41,11 @@ openfiles /local on
 systeminfo /FO CSV | ConvertFrom-Csv | `
 	select-object * -ExcludeProperty 'Hotfix(s)','Network Card(s)' | `
 	ConvertTo-html -Body "<H2> System Information </H2>" >> $OutLevel1
+# MP additions
+Get-NetNeighbor | select AddressFamily,ifIndex,IPAddress,LinkLayerAddress | Sort-Object -Property AddressFamily | ConvertTo-html -Body "<H2> Network cache entries</H2>" >> $OutLevel1
+Get-NetRoute | ConvertTo-html -Body "<H2> Network routing table</H2>" >> $OutLevel1
+Get-NetTCPConnection | Sort-Object -Property DestinationPrefix | ConvertTo-html -Body "<H2> Network active connections </H2>" >> $OutLevel1
+Get-NetFirewallRule | Where { $_.Enabled -eq 'True' -and $_.Direction -eq 'Inbound' } | ConvertTo-html -Body "<H2> Network Firewall status </H2>" >> $OutLevel1
 
 gwmi -ea 0 Win32_UserProfile | `
 	select LocalPath, SID,@{NAME='last used';EXPRESSION={$_.ConvertToDateTime($_.lastusetime)}} | `
